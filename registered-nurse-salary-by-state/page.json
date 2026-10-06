@@ -1,0 +1,13 @@
+{
+  "title": "Registered Nurse Salary by State",
+  "subtitle": "Median annual wages for registered nurses in all 50 states, based on May 2025 BLS OEWS data.",
+  "dataFile": "./data/registered-nurses.json",
+  "primaryMetric": "medianAnnualWage",
+  "metrics": {
+    "medianAnnualWage": {"label": "Median annual wage", "format": "currency", "decimals": 0},
+    "medianHourlyWage": {"label": "Median hourly wage", "format": "currency", "decimals": 2},
+    "employment": {"label": "Employment", "format": "number", "decimals": 0}
+  },
+  "tableMetrics": ["medianAnnualWage", "medianHourlyWage", "employment"],
+  "tooltipMetrics": ["medianAnnualWage", "medianHourlyWage", "employment"]
+}
