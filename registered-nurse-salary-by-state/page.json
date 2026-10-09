@@ -1,7 +1,7 @@
 {
   "title": "Registered Nurse Salary by State",
   "subtitle": "Median annual wages for registered nurses in all 50 states, based on May 2025 BLS OEWS data.",
-  "publishedDate": "October 9, 2026",
+  "publishedDate": "Oct 2026",
   "dataFile": "./data/registered-nurses.json",
   "downloadFile": "./data/registered-nurse-salary-by-state-2025.csv",
   "primaryMetric": "medianAnnualWage",
