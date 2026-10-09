@@ -1,0 +1,14 @@
+{
+  "statesLoaded": 50,
+  "minimum": {
+    "state": "Alabama",
+    "medianAnnualWage": 77080
+  },
+  "maximum": {
+    "state": "California",
+    "medianAnnualWage": 140270
+  },
+  "missingOrSuppressed": [],
+  "release": "May 2025 standard STATE estimates",
+  "soc": "29-1141"
+}

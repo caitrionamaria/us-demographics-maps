@@ -2,8 +2,10 @@
 /* Interaction-only fixes: preserve the map geometry and its visual styling. */
 .state-map .state { pointer-events: all; cursor: pointer; }
 /* Details must not create dead zones over the map; keep the close control usable. */
-.tooltip { pointer-events: none; }
-.tooltip .close { pointer-events: auto; }
+.tooltip, .tooltip * { pointer-events: none; }
+.tooltip.is-pinned .close { pointer-events: auto; }
+/* Old cached renderers must not reveal internal QA output. */
+state-comparison .validation { display: none !important; }
 
 /* WordPress iframe mode. Standalone presentation is unchanged. */
 .embed-mode .masthead,
