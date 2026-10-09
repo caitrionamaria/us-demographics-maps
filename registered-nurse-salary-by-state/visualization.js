@@ -69,6 +69,15 @@ export class StateComparison extends HTMLElement {
       p.addEventListener('blur',()=>{if(!this.hoveredPath)this.restoreSelection();});
       p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();this.show(row,p,true);}if(e.key==='Escape')this.hide();});this.svg.append(p);
     }
+    // Paint the exact active geometry last, above every neighbouring polygon.
+    // The outline is purely decorative: it cannot grow or steal a hit area.
+    this.highlight=document.createElementNS(ns,'path');
+    this.highlight.setAttribute('class','state-highlight');
+    this.highlight.setAttribute('fill','none');
+    this.highlight.setAttribute('pointer-events','none');
+    this.highlight.setAttribute('aria-hidden','true');
+    this.highlight.setAttribute('focusable','false');
+    this.svg.append(this.highlight);
     // One shared event path for all polygons and islands. Only leaving the SVG
     // restores a selection; individual path boundaries cannot race each other.
     const stateAtEvent=e=>e.target.closest?.('path.state');
@@ -115,7 +124,8 @@ export class StateComparison extends HTMLElement {
   }
   show(row,path,pinned){
     if(pinned)this.selection={row,path};this.select.value=this.selection?.row.fips || row.fips;
-    for(const p of this.svg.children)p.classList.toggle('selected',p===path);
+    for(const p of this.svg.querySelectorAll('.state'))p.classList.toggle('selected',p===path);
+    this.highlight.setAttribute('d',path.getAttribute('d'));
     this.tip.replaceChildren(el('strong',row.state));const close=el('button','×','close');close.type='button';close.setAttribute('aria-label','Close state details');close.onclick=()=>this.hide();this.tip.append(close);
     // Hover details are completely transparent to the pointer, including ×.
     // The close button becomes clickable when the user selects a state.
@@ -129,6 +139,6 @@ export class StateComparison extends HTMLElement {
     this.tip.style.top=`${Math.max(0,Math.min(box.top-wrap.top,wrap.height-this.tip.offsetHeight))}px`;
   }
   restoreSelection(){if(this.selection)this.show(this.selection.row,this.selection.path,true);else this.hide();}
-  hide(){this.selection=null;this.hoveredPath=null;this.tip.hidden=true;this.select.value='';for(const p of this.svg.children)p.classList.remove('selected');}
+  hide(){this.selection=null;this.hoveredPath=null;this.tip.hidden=true;this.select.value='';this.highlight.removeAttribute('d');for(const p of this.svg.querySelectorAll('.state'))p.classList.remove('selected');}
 }
 customElements.define('state-comparison',StateComparison);
