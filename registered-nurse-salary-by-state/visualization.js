@@ -61,27 +61,25 @@ export class StateComparison extends HTMLElement {
     const ns='http://www.w3.org/2000/svg';this.svg=document.createElementNS(ns,'svg');this.svg.setAttribute('viewBox',this.geometry.viewBox);this.svg.setAttribute('class','state-map');this.svg.setAttribute('role','group');this.svg.setAttribute('aria-label',`US map: ${metric.label}`);
     for(const g of this.geometry.states){const row=this.byId.get(g.fips),p=document.createElementNS(ns,'path');p.setAttribute('d',g.path);p.setAttribute('class','state');p.setAttribute('fill',this.color(row[c.primaryMetric]));p.setAttribute('tabindex','0');p.setAttribute('role','button');p.setAttribute('aria-label',`${row.state}: ${metric.label} ${this.value(row,c.primaryMetric)}`);p.dataset.fips=g.fips;
       p.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')this.show(row,p,false);});
-      p.addEventListener('pointerleave',()=>{if(!this.pinned)this.hide();});
+      p.addEventListener('pointerleave',()=>this.restoreSelection());
       p.addEventListener('focus',()=>this.show(row,p,false));
-      p.addEventListener('blur',()=>{if(!this.pinned)this.hide();});
+      p.addEventListener('blur',()=>this.restoreSelection());
       p.addEventListener('click',()=>this.show(row,p,true));
       p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();this.show(row,p,true);}if(e.key==='Escape')this.hide();});this.svg.append(p);
     }
     this.tip=el('div',undefined,'tooltip');this.tip.setAttribute('role','status');this.tip.setAttribute('aria-live','polite');this.tip.hidden=true;
-    this.tip.addEventListener('pointerleave',()=>{if(!this.pinned)this.hide();});
     this.mapWrap.append(this.svg,this.tip);this.append(this.mapWrap);
     const legend=el('div',undefined,'legend');legend.setAttribute('aria-label',`${metric.label} ranges`);
     const f=x=>formatValue(x,metric);
     for(let i=0;i<=this.thresholds.length;i++){const label=!this.thresholds.length?'All reported values':i===0?`Under ${f(this.thresholds[0])}`:i===this.thresholds.length?`${f(this.thresholds[i-1])} or more`:`${f(this.thresholds[i-1])}–${f(this.thresholds[i] - 10**-(metric.decimals??0))}`;const item=el('span',undefined,'legend-item'),swatch=el('span',undefined,'swatch');swatch.style.background=COLORS[i];item.append(swatch,el('span',label));legend.append(item);}
     if(this.rows.some(r=>r[c.primaryMetric]===null)){const item=el('span','Not available','legend-item'),sw=el('span',undefined,'swatch');sw.style.background='#e3e5e7';item.prepend(sw);legend.append(item);}this.append(legend);
     const controls=el('div',undefined,'map-controls'),label=el('label','Explore a state');this.select=el('select');this.select.id='state-select';label.htmlFor=this.select.id;const placeholder=el('option','Select a state');placeholder.value='';this.select.append(placeholder);for(const r of sortRows(this.rows,'state','ascending')){const o=el('option',r.state);o.value=r.fips;this.select.append(o);}this.select.addEventListener('change',()=>{const r=this.byId.get(this.select.value);if(r)this.show(r,this.svg.querySelector(`[data-fips="${r.fips}"]`),true);else this.hide();});controls.append(label,this.select);this.append(controls);
-    const section=el('section',undefined,'table-section'),row=el('div',undefined,'section-row');row.append(el('h2','Compare all 50 states'));const download=el('a','Download data ↓');download.href=new URL(c.dataFile,new URL(this.getAttribute('config'),document.baseURI));download.setAttribute('download','');row.append(download);section.append(row);
+    const section=el('section',undefined,'table-section'),row=el('div',undefined,'section-row');row.append(el('h2','Compare all 50 states'));const download=el('a','Download data ↓');const downloadURL=new URL(c.downloadFile,new URL(this.getAttribute('config'),document.baseURI));download.href=downloadURL;download.download=downloadURL.pathname.split('/').at(-1);row.append(download);section.append(row);
     const scroll=el('div',undefined,'table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Sortable state estimates');this.table=el('table');this.caption=el('caption');this.table.append(this.caption);const head=el('thead'),tr=el('tr');this.headers=[];
     for(const key of ['state',...c.tableMetrics]){const th=el('th');th.scope='col';const b=el('button');b.type='button';b.addEventListener('click',()=>{this.direction=this.sortKey===key&&this.direction==='descending'?'ascending':this.sortKey===key?'descending':key==='state'?'ascending':'descending';this.sortKey=key;this.renderTable();});th.append(b);this.headers.push({key,th,b});tr.append(th);}head.append(tr);this.body=el('tbody');this.table.append(head,this.body);scroll.append(this.table);section.append(scroll);this.append(section);this.renderTable();
     const note=el('section',undefined,'source');note.append(el('p',`Source: ${source.organization}, ${source.program}, ${source.period}.`));const link=el('a','Official BLS state estimates ↗');link.href=source.url;note.append(link);note.append(el('p','Standard state estimates, cross-industry. Annual wages are reported BLS estimates; they are not recalculated from rounded hourly wages. DC and territories are excluded. A median is the midpoint of the wage distribution; a mean is an average.'));
     note.append(el('p','Map ranges use approximate quintiles rounded to readable boundaries. Alaska and Hawaii are inset and not to scale. Unavailable or suppressed values are labeled, excluded from color ranges, and sorted last.'));
-    const vals=sortRows(this.rows.filter(r=>r[c.primaryMetric]!==null),c.primaryMetric,'ascending');const missing=this.rows.filter(r=>Object.keys(r.status||{}).length).length;
-    note.append(el('p',`${this.rows.length} states validated · ${vals.length?`Range: ${this.value(vals[0],c.primaryMetric)} (${vals[0].state}) to ${this.value(vals.at(-1),c.primaryMetric)} (${vals.at(-1).state})`:'No reported values'} · ${missing} states with missing/suppressed fields.`,'validation'));this.append(note);
+    this.append(note);
     this.addEventListener('keydown',e=>{if(e.key==='Escape')this.hide();});
   }
   color(v){return v===null?'#e3e5e7':COLORS[this.thresholds.filter(t=>v>=t).length];}
@@ -91,12 +89,13 @@ export class StateComparison extends HTMLElement {
     this.body.replaceChildren();for(const row of sortRows(this.rows,this.sortKey,this.direction)){const tr=el('tr');tr.dataset.fips=row.fips;const state=el('td',row.state);state.append(el('span',row.abbreviation,'abbr'));tr.append(state);for(const key of this.config.tableMetrics){const td=el('td',this.value(row,key));td.dataset.metric=key;tr.append(td);}this.body.append(tr);}
   }
   show(row,path,pinned){
-    if(this.pinned&&!pinned)return;this.pinned=pinned;this.select.value=row.fips;
+    if(pinned)this.selection={row,path};this.select.value=this.selection?.row.fips || row.fips;
     for(const p of this.svg.children)p.classList.toggle('selected',p===path);
     this.tip.replaceChildren(el('strong',row.state));const close=el('button','×','close');close.type='button';close.setAttribute('aria-label','Close state details');close.onclick=()=>this.hide();this.tip.append(close);
     for(const key of this.config.tooltipMetrics){const p=el('p');p.append(el('span',this.config.metrics[key].label+':'),el('b',this.value(row,key)));this.tip.append(p);}this.tip.hidden=false;
     const box=path.getBoundingClientRect(),wrap=this.mapWrap.getBoundingClientRect();this.tip.style.left=`${Math.max(0,Math.min(box.right-wrap.left+10,wrap.width-300))}px`;this.tip.style.top=`${Math.max(0,Math.min(box.top-wrap.top,wrap.height-180))}px`;
   }
-  hide(){this.pinned=false;this.tip.hidden=true;this.select.value='';for(const p of this.svg.children)p.classList.remove('selected');}
+  restoreSelection(){if(this.selection)this.show(this.selection.row,this.selection.path,false);else this.hide();}
+  hide(){this.selection=null;this.tip.hidden=true;this.select.value='';for(const p of this.svg.children)p.classList.remove('selected');}
 }
 customElements.define('state-comparison',StateComparison);
