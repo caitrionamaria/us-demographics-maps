@@ -28,3 +28,6 @@ state-comparison .validation { display: none !important; }
 [data-embed="table"] .map-controls { display: none; }
 /* Include content margins in the measured body, without a viewport-height floor. */
 .embed-mode body { display: flow-root; }
+
+/* Wrap between complete metadata items on narrow screens. */
+.meta > span { white-space: nowrap; }

@@ -60,7 +60,7 @@ export class StateComparison extends HTMLElement {
     document.querySelector('#subtitle').textContent=c.subtitle;
     document.querySelector('meta[name="description"]').content=c.subtitle;
     this.replaceChildren();
-    const meta=el('div',undefined,'meta');meta.append(el('span',source.period.toUpperCase()),el('span','50 STATES'),el('span',`SOC ${source.soc}`));this.append(meta);
+    const meta=el('div',undefined,'meta');if(c.publishedDate)meta.append(el('span',`PUBLISHED: ${c.publishedDate.toUpperCase()}`));meta.append(el('span',`LATEST AVAILABLE DATA: ${source.period.toUpperCase()}`),el('span',`${this.rows.length} STATES`));this.append(meta);
     const heading=el('div',undefined,'map-heading');heading.append(el('h2',metric.label),el('span','Hover, tap, or select a state to explore.','hint'));this.append(heading);
     this.mapWrap=el('div',undefined,'map-wrap');
     const ns='http://www.w3.org/2000/svg';this.svg=document.createElementNS(ns,'svg');this.svg.setAttribute('viewBox',this.geometry.viewBox);this.svg.setAttribute('class','state-map');this.svg.setAttribute('role','group');this.svg.setAttribute('aria-label',`US map: ${metric.label}`);
