@@ -8,12 +8,23 @@
 /* Old cached renderers must not reveal internal QA output. */
 state-comparison .validation { display: none !important; }
 
-/* WordPress iframe mode. Standalone presentation is unchanged. */
+/* Keep the category link in the existing editorial style. */
+.eyebrow a { color: inherit; text-decoration: none; }
+/* Embed retains the complete article header and standalone content spacing. */
 .embed-mode .masthead,
-.embed-mode .eyebrow,
-.embed-mode #page-title,
-.embed-mode #subtitle,
-.embed-mode .meta,
 .embed-mode .site-footer { display: none; }
-.embed-mode main { margin-top: 0; margin-bottom: 24px; }
-.embed-mode .map-heading { margin-top: 0; padding-top: 12px; }
+
+/* Split embeds share the same renderer, configuration and dataset. */
+[data-embed="map"] .table-section,
+[data-embed="map"] .source,
+[data-embed="map"] noscript,
+[data-embed="table"] .eyebrow,
+[data-embed="table"] #page-title,
+[data-embed="table"] #subtitle,
+[data-embed="table"] .meta,
+[data-embed="table"] .map-heading,
+[data-embed="table"] .map-wrap,
+[data-embed="table"] .legend,
+[data-embed="table"] .map-controls { display: none; }
+/* Include content margins in the measured body, without a viewport-height floor. */
+.embed-mode body { display: flow-root; }
