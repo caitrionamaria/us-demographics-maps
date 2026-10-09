@@ -82,7 +82,7 @@ export class StateComparison extends HTMLElement {
     // restores a selection; individual path boundaries cannot race each other.
     const stateAtEvent=e=>e.target.closest?.('path.state');
     const preview=e=>{
-      if(e.pointerType==='touch')return;
+      if(this.selection||e.pointerType==='touch')return;
       const path=stateAtEvent(e);
       if(path===this.hoveredPath)return;
       this.hoveredPath=path;
@@ -123,6 +123,9 @@ export class StateComparison extends HTMLElement {
     this.body.replaceChildren();for(const row of sortRows(this.rows,this.sortKey,this.direction)){const tr=el('tr');tr.dataset.fips=row.fips;const state=el('td',row.state);state.append(el('span',row.abbreviation,'abbr'));tr.append(state);for(const key of this.config.tableMetrics){const td=el('td',this.value(row,key));td.dataset.metric=key;tr.append(td);}this.body.append(tr);}
   }
   show(row,path,pinned){
+    // Only an explicit click, keyboard activation or dropdown change can
+    // replace a selection. Hover and keyboard-focus previews cannot unlock it.
+    if(this.selection&&!pinned)return;
     if(pinned)this.selection={row,path};this.select.value=this.selection?.row.fips || row.fips;
     for(const p of this.svg.querySelectorAll('.state'))p.classList.toggle('selected',p===path);
     this.highlight.setAttribute('d',path.getAttribute('d'));
