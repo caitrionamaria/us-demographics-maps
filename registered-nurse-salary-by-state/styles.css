@@ -33,4 +33,4 @@ state-comparison .validation { display: none !important; }
 .meta > span { white-space: nowrap; }
 
 /* Only the map iframe uses this top inset; standalone spacing is unchanged. */
-[data-embed="map"] main { margin-top: 40px; }
+[data-embed="map"] main { margin-top: 15px; }
